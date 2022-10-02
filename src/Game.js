@@ -4,7 +4,7 @@
 
     Game.js
 
-    Archivo principal para el juego NOMBRE_JUEGO.
+    Archivo principal para el juego Carrera de Estimaciones.
 
     Hecho por Alberto Leyva
 
@@ -43,10 +43,6 @@ const nivelesObjs = {
 // Nivel fácil por defecto
 var level = nivelesObjs.Facil;
 
-// Colo del carro
-
-var carColor = 'blueCar';
-
 // VARIABLES 
 
 // Tamaño de la ventana 
@@ -59,20 +55,33 @@ var cursors;
 //Carro principal
 var car;
 
+// Colo del carro por default
+var carColor = 'blueCar';
+
 //Carretera de fondo
 var road;
 
 //Puntos a donde se mueve el carro
-var point1 = new Phaser.Math.Vector2();
-var point2 = new Phaser.Math.Vector2();
-var point3 = new Phaser.Math.Vector2();
+var centro = 400;
+var derecha = 650;
+var izquierda = 150;
+
+// Direcciones
+var der_cen;
+var cen_der;
+var cen_izq;
+var izq_cen;
+
+//Animacion
+var anim = 'Quad'
 
 // Timer
 var timer;
 var tiempo;
 
+//Funcion simple que convierte a segundos
 function seg(s){
-    return (s + 1) * 1000;
+    return (s) * 1000;
 };
 
 //Cargar recursos 
@@ -345,10 +354,6 @@ class Seleccion extends Phaser.Scene{
     }
 }
 
-// IMPORTANTE
-//
-// ACTUALIZAR COLLIDER PORQUE SI DEJAS PRESIONADO SE VA A LA VERGA
-
 class Juego extends Phaser.Scene{
 
     constructor(){
@@ -364,7 +369,7 @@ class Juego extends Phaser.Scene{
 
         //Definicion del carro
         car = this.physics.add.image(400, 475, carColor)
-        .setScale(0.45);
+        .setScale(0.9);
 
         //Que no se salga del canvas
         car.setCollideWorldBounds(true);
@@ -372,29 +377,52 @@ class Juego extends Phaser.Scene{
         //Definicion del teclado
         cursors = this.input.keyboard.createCursorKeys();
 
+        //Tweens de direccion: orgigen_destino
+        cen_der = this.tweens.add({
+            targets: car,
+            duration: seg(1),
+            x: derecha,
+            paused: true,
+            ease: anim,
+            onActive: () => car.setAngle(10),
+            onComplete: () => car.setAngle(0)
+        });
+
+        der_cen = this.tweens.add({
+            targets: car,
+            duration: seg(1),
+            x: centro,
+            paused: true,
+            ease: anim,
+            onActive: () => car.setAngle(-10),
+            onComplete: () => car.setAngle(0)
+        });
+
+        cen_izq = this.tweens.add({
+            targets: car,
+            duration: seg(1),
+            x: izquierda,
+            paused: true,
+            ease: anim,
+            onActive: () => car.setAngle(-10),
+            onComplete: () => car.setAngle(0)
+        });
+
+        izq_cen = this.tweens.add({
+            targets: car,
+            duration: seg(1),
+            x: centro,
+            paused: true,
+            ease: anim,
+            onActive: () => car.setAngle(10),
+            onComplete: () => car.setAngle(0)
+        });
+
         //Timer
 
         timer = this.time.addEvent({delay: seg(4), callback: this.girar})
 
         tiempo = this.add.text(32,32);
-
-        //Puntos donde se detiene el carro
-
-        //Derecha
-        point1.x = 650;
-        point1.y = 475;
-
-        //En medio
-        point2.x = 400;
-        point2.y = 475;
-
-        //Izquierda
-        point3.x = 150;
-        point3.y = 475;
-
-        //Si, tal vez sea mas facil llamando los point como la direccion pero me dio flojera cambiarlo
-
-
     }
 
     update ()
@@ -405,20 +433,20 @@ class Juego extends Phaser.Scene{
 
         //TECLADO
 
-        //A la derecha
+       //A la derecha
         if (cursors.right.isDown)
         {
             
             //Si esta en el cajon del medio se va a la derecha
-            if (car.x < 410 && car.x > 390)
+            if (car.x < centro + 10 && car.x > centro - 10)
             {
-                this.physics.moveToObject(car, point1, 200);
+                cen_der.resume();
             }
 
             //Si esta en el cajon de la izquiera se va en medio
-            else if (car.x < 160 && car.x > 140)
+            else if (car.x < izquierda + 10 && car.x > izquierda - 10)
             {
-                this.physics.moveToObject(car, point2, 200);
+                izq_cen.resume();
             }
             
         }
@@ -427,41 +455,15 @@ class Juego extends Phaser.Scene{
         {
             
             //Si esta en el cajon de la derecha se va en medio
-            if (car.x < 660 && car.x > 640)
+            if (car.x < derecha + 10 && car.x > derecha - 10)
             {
-                this.physics.moveToObject(car, point2, 200);
+                der_cen.resume();
             }
 
             //Si está en el cajon de en medio se va a la izquierda
-            else if (car.x < 410 && car.x > 390)
+            else if (car.x < centro + 10 && car.x > centro - 10)
             {
-                this.physics.moveToObject(car, point3, 200);
-            }
-        }
-        else
-        {
-
-            // COMPRUEBA SI YA LLEGÓ
-
-            //Al punto 1 (derecha)
-            var distance1 = Phaser.Math.Distance.Between(car.x, car.y, point1.x, point1.y);
-            if (distance1 < 4)
-            {
-                car.body.stop()
-            }
-
-            //Al punto 2 (en medio)
-            var distance2 = Phaser.Math.Distance.Between(car.x, car.y, point2.x, point2.y);
-            if (distance2 < 4)
-            {
-                car.body.stop()
-            }
-
-            //Al punto 3 (izquierda)
-            var distance3 = Phaser.Math.Distance.Between(car.x, car.y, point3.x, point3.y);
-            if (distance3 < 4)
-            {
-                car.body.stop()
+                cen_izq.resume();
             }
         }
 
@@ -470,7 +472,7 @@ class Juego extends Phaser.Scene{
 
     girar()
     {
-        car.setAngle(45);
+        console.log("xd");
     }
 }
 
@@ -491,6 +493,3 @@ const config = {
 };
 
 document.fonts.load('10pt BoldnessRace').then(() => new Phaser.Game(config));
-
-//Juego
-//var game = new Phaser.Game(config);
