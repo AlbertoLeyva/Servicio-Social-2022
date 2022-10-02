@@ -43,6 +43,10 @@ const nivelesObjs = {
 // Nivel fácil por defecto
 var level = nivelesObjs.Facil;
 
+// Colo del carro
+
+var carColor = 'blueCar';
+
 // VARIABLES 
 
 // Tamaño de la ventana 
@@ -86,7 +90,7 @@ class Boot extends Phaser.Scene{
     {
         this.load.setPath('assets/');
 
-        this.load.image('road', 'road.png');
+        this.load.image('road', 'road2.png');
         this.load.image('car', 'car.png');
         this.load.image('btJugar', 'btJugar.png');
         this.load.image('btVamos', 'btVamos.png');
@@ -97,6 +101,14 @@ class Boot extends Phaser.Scene{
         this.load.image('btMedio', 'btMedio.png');
         this.load.image('btDificil', 'btDificil.png');
         this.load.image('btBack', 'btBack.png')
+        this.load.image('btBlue', 'btBlue.png');
+        this.load.image('btYellow', 'btYellow.png');
+        this.load.image('btRed', 'btRed.png');
+        this.load.image('btGreen', 'btGreen.png');
+        this.load.image('blueCar', 'blue_car.png');
+        this.load.image('yellowCar', 'yellow_car.png');
+        this.load.image('redCar', 'red_car.png');
+        this.load.image('greenCar', 'green_car.png');
 
         var p = this.add.text(w/2, h/2, "Cargando... 0%", {fontSize: 30}).setOrigin(0.5, 0.5);
         this.load.on('progress', (value) => { p.setText(`Cargando... ${Math.floor(value*100)}%`) });
@@ -269,6 +281,43 @@ class Seleccion extends Phaser.Scene{
         .on('pointerout', () => btDificil.setScale(s))
         .on('pointerdown', () => btFacil.setTint(gris) && btMedio.setTint(gris) && btDificil.clearTint());
 
+        //Carros
+
+        var btBlue = this.add.image(450, 270, 'btBlue')
+        .setScale(s - 0.2)
+        .setInteractive()
+        .on('pointerover', () => btBlue.setScale(s-0.1))
+        .on('pointerout', () => btBlue.setScale(s-0.2))
+        .on('pointerdown', () => btBlue.clearTint() && btYellow.setTint(gris) && btRed.setTint(gris) && btGreen.setTint(gris))
+        .on('pointerdown', () => carColor = 'blueCar');
+
+        var btYellow = this.add.image(650, 270, 'btYellow')
+        .setScale(s - 0.2)
+        .setTint(gris)
+        .setInteractive()
+        .on('pointerover', () => btYellow.setScale(s-0.1))
+        .on('pointerout', () => btYellow.setScale(s-0.2))
+        .on('pointerdown', () => btBlue.setTint(gris) && btYellow.clearTint() && btRed.setTint(gris) && btGreen.setTint(gris))
+        .on('pointerdown', () => carColor = 'yellowCar');
+
+        var btRed = this.add.image(450, 380, 'btRed')
+        .setScale(s - 0.2)
+        .setTint(gris)
+        .setInteractive()
+        .on('pointerover', () => btRed.setScale(s-0.1))
+        .on('pointerout', () => btRed.setScale(s-0.2))
+        .on('pointerdown', () => btBlue.setTint(gris) && btYellow.setTint(gris) && btRed.clearTint() && btGreen.setTint(gris))
+        .on('pointerdown', () => carColor = 'redCar');     
+
+        var btGreen = this.add.image(650, 380, 'btGreen')
+        .setScale(s - 0.2)
+        .setTint(gris)
+        .setInteractive()
+        .on('pointerover', () => btGreen.setScale(s-0.1))
+        .on('pointerout', () => btGreen.setScale(s-0.2))
+        .on('pointerdown', () => btBlue.setTint(gris) && btYellow.setTint(gris) && btRed.setTint(gris) && btGreen.clearTint())
+        .on('pointerdown', () => carColor = 'greenCar');
+
         //Boton
 
         var btJugar = this.add.image(w/2, h/2 + 240 , 'btJugar')
@@ -314,8 +363,8 @@ class Juego extends Phaser.Scene{
         road = this.add.tileSprite(400, 300, 0, 0, "road");
 
         //Definicion del carro
-        car = this.physics.add.image(400, 475, 'car').setScale(0.4);
-        car.setAngle(90);
+        car = this.physics.add.image(400, 475, carColor)
+        .setScale(0.45);
 
         //Que no se salga del canvas
         car.setCollideWorldBounds(true);
