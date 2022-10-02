@@ -10,7 +10,7 @@
 
     Servicio Social 2022 | FMAT | UADY 
 
-    Ultima modificación: 1/10/22
+    Ultima modificación: 2/10/22
 
 ========================================================================================
 
@@ -93,6 +93,10 @@ class Boot extends Phaser.Scene{
         this.load.image('btSiguiente', 'btSiguiente.png');
         this.load.image('btPlay', 'play.png');
         this.load.image('title', 'title2.png');
+        this.load.image('btFacil', 'btFacil.png');
+        this.load.image('btMedio', 'btMedio.png');
+        this.load.image('btDificil', 'btDificil.png');
+        this.load.image('btBack', 'btBack.png')
 
         var p = this.add.text(w/2, h/2, "Cargando... 0%", {fontSize: 30}).setOrigin(0.5, 0.5);
         this.load.on('progress', (value) => { p.setText(`Cargando... ${Math.floor(value*100)}%`) });
@@ -120,7 +124,6 @@ class Menu extends Phaser.Scene{
 
         var btJugar = this.add.image(w/2, h/2 + 150 , 'btPlay')
         .setInteractive()
-        .setScale(1)
         .on('pointerover', () => btJugar.setScale(1.2))
         .on('pointerout', () => btJugar.setScale(1))                
         .once('pointerdown', () => { this.scene.start('instrucciones'); });
@@ -149,15 +152,43 @@ class Instrucciones extends Phaser.Scene{
 
         //Instrucciones
 
-        var inst = this.add.text(w/2, h/2 - 100, "Instrucciones,\npero en bonito", {fontSize: 50, fill: '#FFF', align: 'center'})
-        .setOrigin(0.5, 0.5);
+        var inst = this.add.text(w/2, h/2 - 230,
+        
+        "INSTRUCCIONES"
+        
+        ,{fontFamily: 'BoldnessRace', fontSize: 50, fill: '#FFF300', align: 'center'})
+        .setStroke('#FF0000', 3)
+        .setOrigin(0.5, 0.5)
+        .setPadding(10,10,10,10);
+
+        var inst2 = this.add.text(w/2, h/2,
+        
+        "Aparecerán en la pantalla operaciones\nmatemáticas que tendrás que hacer mentalmente.\n\nUsa las flechas del teclado para mover tu\ncarro a la respuesta que creas correcta.\n\n¡Escoge rápido porque tendrás poco tiempo!\n\nEl juego se acaba cuando hayas contestado todas\nlas operaciones o hayas tenido 3 errores."
+        
+        ,{fontFamily: 'BoldnessRace', fontSize: 30, fill: '#FFF', align: 'center'})
+        .setStroke('#000', 3)
+        .setOrigin(0.5, 0.5)
+        .setPadding(10,10,10,10);
 
         //Boton
 
-        var btJugar = this.add.image(w/2, h/2 + 100 , 'btSiguiente')
+        var s = 0.5;
+
+        var btJugar = this.add.image(w/2, h/2 + 240 , 'btSiguiente')
+        .setScale(s)
         .setInteractive()
-        .setScale(0.1)                
+        .on('pointerover', () => btJugar.setScale(s+0.2))
+        .on('pointerout', () => btJugar.setScale(s))                 
         .once('pointerdown', () => { this.scene.start('seleccion'); });
+
+        //Atras
+
+        var btBack = this.add.image(55, 55 , 'btBack')
+        .setScale(s)
+        .setInteractive()
+        .on('pointerover', () => btBack.setScale(s+0.2))
+        .on('pointerout', () => btBack.setScale(s))                 
+        .once('pointerdown', () => { this.scene.start('menu'); });
 
     }
 
@@ -181,20 +212,80 @@ class Seleccion extends Phaser.Scene{
         road = this.add.tileSprite(400, 300, 0, 0, "road");
         road.alpha = 0.5;
 
-        //Instrucciones
+        //Seleccion
 
-        var inst = this.add.text(w/2, h/2 - 150, "Selecciona la dificultad", {fontSize: 30, fill: '#FFF', align: 'center'})
-        .setOrigin(0.5, 0.5);
+        var inst = this.add.text(w/2, h/2 - 230,
+        
+        "SELECCIÓN"
+        
+        ,{fontFamily: 'BoldnessRace', fontSize: 50, fill: '#FFF300', align: 'center'})
+        .setStroke('#FF0000', 3)
+        .setOrigin(0.5, 0.5)
+        .setPadding(10,10,10,10);
 
-        var inst = this.add.text(w/2, h/2 - 100, "En cuanto la selecciones\niniciará el juego", {fontSize: 25, fill: '#FFF', align: 'center'})
-        .setOrigin(0.5, 0.5);
+        var inst2 = this.add.text(w/2, h/2 - 180,
+        
+        "Selecciona la dificultad y tu carro."
+        
+        ,{fontFamily: 'BoldnessRace', fontSize: 30, fill: '#FFF', align: 'center'})
+        .setStroke('#000', 3)
+        .setOrigin(0.5, 0.5)
+        .setPadding(10,10,10,10);
+
+        var inst3 = this.add.text(w/2, h/2 - 150,
+        
+        "¡Completa los niveles para conseguir los demás carros!"
+        
+        ,{fontFamily: 'BoldnessRace', fontSize: 20, fill: '#FFF', align: 'center'})
+        .setStroke('#000', 3)
+        .setOrigin(0.5, 0.5)
+        .setPadding(10,10,10,10);
+
+        //Dificulltades
+
+        var s = 0.5;
+        var gris = 0x1A1A1A;
+
+        var btFacil = this.add.image(w/4, h/3 + 30, 'btFacil')
+        .setScale(s)
+        .setInteractive()
+        .on('pointerover', () => btFacil.setScale(s + 0.2))
+        .on('pointerout', () => btFacil.setScale(s))
+        .on('pointerdown', () => btFacil.clearTint() && btMedio.setTint(gris) && btDificil.setTint(gris));
+
+        var btMedio = this.add.image(w/4, h/3 + 130, 'btMedio')
+        .setTint(gris)
+        .setScale(s)
+        .setInteractive()
+        .on('pointerover', () => btMedio.setScale(s + 0.2))
+        .on('pointerout', () => btMedio.setScale(s))
+        .on('pointerdown', () => btFacil.setTint(gris) && btMedio.clearTint() && btDificil.setTint(gris));
+
+        var btDificil = this.add.image(w/4, h/3 + 230, 'btDificil')
+        .setTint(gris)
+        .setScale(s)
+        .setInteractive()
+        .on('pointerover', () => btDificil.setScale(s + 0.2))
+        .on('pointerout', () => btDificil.setScale(s))
+        .on('pointerdown', () => btFacil.setTint(gris) && btMedio.setTint(gris) && btDificil.clearTint());
 
         //Boton
 
-        var btJugar = this.add.image(w/2, h/2 + 100 , 'btJugar')
+        var btJugar = this.add.image(w/2, h/2 + 240 , 'btJugar')
+        .setScale(s)
         .setInteractive()
-        .setScale(0.1)                
+        .on('pointerover', () => btJugar.setScale(s+0.2))
+        .on('pointerout', () => btJugar.setScale(s))                
         .once('pointerdown', () => { this.scene.start('juego'); });
+
+        //Atras
+
+        var btBack = this.add.image(55, 55 , 'btBack')
+        .setScale(s)
+        .setInteractive()
+        .on('pointerover', () => btBack.setScale(s+0.2))
+        .on('pointerout', () => btBack.setScale(s))                 
+        .once('pointerdown', () => { this.scene.start('instrucciones'); });
 
     }
 
@@ -350,5 +441,7 @@ const config = {
     scene: [Boot, Menu, Juego, Seleccion, Instrucciones]
 };
 
+document.fonts.load('10pt BoldnessRace').then(() => new Phaser.Game(config));
+
 //Juego
-var game = new Phaser.Game(config);
+//var game = new Phaser.Game(config);
