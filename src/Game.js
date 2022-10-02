@@ -10,7 +10,7 @@
 
     Servicio Social 2022 | FMAT | UADY 
 
-    Ultima modificación: 7/09/22
+    Ultima modificación: 1/10/22
 
 ========================================================================================
 
@@ -88,8 +88,11 @@ class Boot extends Phaser.Scene{
 
         this.load.image('road', 'road.png');
         this.load.image('car', 'car.png');
-        this.load.image('btJugar', 'zote.jpeg');
-        this.load.image('btVamos', '00750225152202L.jpg')
+        this.load.image('btJugar', 'btJugar.png');
+        this.load.image('btVamos', 'btVamos.png');
+        this.load.image('btSiguiente', 'btSiguiente.png');
+        this.load.image('btPlay', 'play.png');
+        this.load.image('title', 'title2.png');
 
         var p = this.add.text(w/2, h/2, "Cargando... 0%", {fontSize: 30}).setOrigin(0.5, 0.5);
         this.load.on('progress', (value) => { p.setText(`Cargando... ${Math.floor(value*100)}%`) });
@@ -109,12 +112,17 @@ class Menu extends Phaser.Scene{
         //Camino de fondo que da vueltas
         road = this.add.tileSprite(w/2, h/2, 0, 0, "road");
 
-        var titulo = this.add.text(w/2, h/2 - 100, "Título de\nesta wea xd", {fontSize: '100px', fill: '#FFF', align: 'center'})
-        .setOrigin(0.5, 0.5);
+        //var titulo = this.add.text(w/2, h/2 - 100, "Título de\nesta wea xd", {fontSize: '100px', fill: '#FFF', align: 'center'})
+        //.setOrigin(0.5, 0.5);
 
-        var btJugar = this.add.image(w/2, h/2 + 50 , 'btJugar')
+        var titulo = this.add.image(w/2, h/2 - 130, 'title')
+        .setScale(0.65);
+
+        var btJugar = this.add.image(w/2, h/2 + 150 , 'btPlay')
         .setInteractive()
-        .setScale(0.2)                
+        .setScale(1)
+        .on('pointerover', () => btJugar.setScale(1.2))
+        .on('pointerout', () => btJugar.setScale(1))                
         .once('pointerdown', () => { this.scene.start('instrucciones'); });
     }
 
@@ -146,10 +154,10 @@ class Instrucciones extends Phaser.Scene{
 
         //Boton
 
-        var btJugar = this.add.image(w/2, h/2 + 100 , 'btVamos')
+        var btJugar = this.add.image(w/2, h/2 + 100 , 'btSiguiente')
         .setInteractive()
         .setScale(0.1)                
-        .once('pointerdown', () => { this.scene.start('dificultad'); });
+        .once('pointerdown', () => { this.scene.start('seleccion'); });
 
     }
 
@@ -161,10 +169,10 @@ class Instrucciones extends Phaser.Scene{
 
 }
 
-class Dificultad extends Phaser.Scene{
+class Seleccion extends Phaser.Scene{
 
     constructor(){
-        super('dificultad');
+        super('seleccion');
     }
 
     create(){
@@ -183,7 +191,7 @@ class Dificultad extends Phaser.Scene{
 
         //Boton
 
-        var btJugar = this.add.image(w/2, h/2 + 100 , 'btVamos')
+        var btJugar = this.add.image(w/2, h/2 + 100 , 'btJugar')
         .setInteractive()
         .setScale(0.1)                
         .once('pointerdown', () => { this.scene.start('juego'); });
@@ -339,7 +347,7 @@ const config = {
         }
     },
     
-    scene: [Boot, Menu, Juego, Dificultad, Instrucciones]
+    scene: [Boot, Menu, Juego, Seleccion, Instrucciones]
 };
 
 //Juego
