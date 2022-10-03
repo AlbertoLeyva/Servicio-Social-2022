@@ -84,6 +84,23 @@ function seg(s){
     return (s) * 1000;
 };
 
+//Progreso
+
+var jProgreso;
+
+function readTextFile(file, callback) {
+    var rawFile = new XMLHttpRequest();
+    rawFile.overrideMimeType("application/json");
+    rawFile.open("GET", file, true);
+    rawFile.onreadystatechange = function() {
+        if (rawFile.readyState === 4 && rawFile.status == "200") {
+            callback(rawFile.responseText);
+        }
+    }
+    rawFile.send(null);
+}
+
+
 //Cargar recursos 
 
 class Boot extends Phaser.Scene{
@@ -118,6 +135,11 @@ class Boot extends Phaser.Scene{
         this.load.image('yellowCar', 'yellow_car.png');
         this.load.image('redCar', 'red_car.png');
         this.load.image('greenCar', 'green_car.png');
+        this.load.image('lock', 'candado.png');
+
+        readTextFile("./progreso.json", function(text){
+            jProgreso = JSON.parse(text);
+        });
 
         var p = this.add.text(w/2, h/2, "Cargando... 0%", {fontSize: 30}).setOrigin(0.5, 0.5);
         this.load.on('progress', (value) => { p.setText(`Cargando... ${Math.floor(value*100)}%`) });
@@ -338,6 +360,37 @@ class Seleccion extends Phaser.Scene{
         .on('pointerout', () => btGreen.setScale(s-0.2))
         .on('pointerdown', () => btBlue.setTint(gris) && btYellow.setTint(gris) && btRed.setTint(gris) && btGreen.clearTint())
         .on('pointerdown', () => carColor = 'greenCar');
+
+        if (jProgreso.avance == 0){
+
+            this.add.image(w/4, h/3 + 130, 'lock').setScale(0.2);
+            this.add.image(w/4, h/3 + 230, 'lock').setScale(0.2);
+            this.add.image(650, 270, 'lock').setScale(0.2);
+            this.add.image(450, 380, 'lock').setScale(0.2);
+            this.add.image(650, 380, 'lock').setScale(0.2);
+
+            btMedio.disableInteractive();
+            btDificil.disableInteractive();
+
+            btYellow.disableInteractive();
+            btRed.disableInteractive();
+            btGreen.disableInteractive();
+        }
+        else if (jProgreso.avance == 1){
+            this.add.image(w/4, h/3 + 230, 'lock').setScale(0.2);
+            this.add.image(450, 380, 'lock').setScale(0.2);
+            this.add.image(650, 380, 'lock').setScale(0.2);
+
+            btDificil.disableInteractive();
+
+            btRed.disableInteractive();
+            btGreen.disableInteractive();
+        }
+        else if (jProgreso.avance == 2){
+            this.add.image(650, 380, 'lock').setScale(0.2);
+
+            btGreen.disableInteractive();
+        }
 
         //Boton
 
