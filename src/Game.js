@@ -137,12 +137,24 @@ class Menu extends Phaser.Scene{
         //Camino de fondo que da vueltas
         road = this.add.tileSprite(w/2, h/2, 0, 0, "road");
 
-        //var titulo = this.add.text(w/2, h/2 - 100, "Título de\nesta wea xd", {fontSize: '100px', fill: '#FFF', align: 'center'})
-        //.setOrigin(0.5, 0.5);
-
+        //Titulos
         var titulo = this.add.image(w/2, h/2 - 130, 'title')
         .setScale(0.65);
 
+        this.tweens.add({
+            targets: titulo,
+            scaleX: 0.67,
+            scaleY: 0.67,
+            ease: 'Power2',
+            duration: 500,
+            delay: 50,
+            repeat: -1,
+            yoyo: true,
+            repeatDelay: 500
+
+        });
+
+        //Boton
         var btJugar = this.add.image(w/2, h/2 + 150 , 'btPlay')
         .setInteractive()
         .on('pointerover', () => btJugar.setScale(1.2))
@@ -422,7 +434,7 @@ class Juego extends Phaser.Scene{
 
         timer = this.time.addEvent({delay: seg(4), callback: this.girar})
 
-        tiempo = this.add.text(32,32);
+        tiempo = this.add.text(w-120,20);
     }
 
     update ()
@@ -440,13 +452,13 @@ class Juego extends Phaser.Scene{
             //Si esta en el cajon del medio se va a la derecha
             if (car.x < centro + 10 && car.x > centro - 10)
             {
-                cen_der.resume();
+                cen_der.play();
             }
 
             //Si esta en el cajon de la izquiera se va en medio
             else if (car.x < izquierda + 10 && car.x > izquierda - 10)
             {
-                izq_cen.resume();
+                izq_cen.play();
             }
             
         }
@@ -457,17 +469,22 @@ class Juego extends Phaser.Scene{
             //Si esta en el cajon de la derecha se va en medio
             if (car.x < derecha + 10 && car.x > derecha - 10)
             {
-                der_cen.resume();
+                der_cen.play();
             }
 
             //Si está en el cajon de en medio se va a la izquierda
             else if (car.x < centro + 10 && car.x > centro - 10)
             {
-                cen_izq.resume();
+                cen_izq.play();
             }
         }
 
-        tiempo.setText("Tiempo: " + timer.getRemainingSeconds().toString().substr(0,1));
+        tiempo
+        .setText(timer.getRemainingSeconds().toString().substr(0,1))
+        .setFontFamily('Arial')
+        .setFill('#FF0000')
+        .setFontSize(60)
+        .setStroke('#000', 5);
     }
 
     girar()
