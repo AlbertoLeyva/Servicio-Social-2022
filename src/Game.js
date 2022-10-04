@@ -1,4 +1,4 @@
-/*
+/* 
 
 ========================================================================================
 
@@ -16,32 +16,40 @@
 
  */
 
-// Declaración de los niveles en forma de objetos
+// Niveles
 
-// Fácil, medio y difícil 
+// Fácil => 5 operaciones, 1 a 2 digitos, 2 minutos
+// Medio => 5 operaciones, 2 a 3 digitos, 3 minutos
+// Medio => 5 operaciones, 3 a 4 digitos, 3 minutos
 
-// Explicación de niveles*
-
-const nivelesObjs = {
-
-    Facil: {
-        titulo: "facil",
-        carro: 'car'
-    },
-
-    Normal: {
-        titulo: "normal",
-        carro: 'car'
-    },
-
-    Dificil: {
-        titulo: "dificil",
-        carro: 'car'
+class Operacion{
+    constructor(op, res, t1, t2){
+        this.op = op;
+        this.res = res;
+        this.t1 = t1;
+        this.t2 = t2;
     }
 }
 
-// Nivel fácil por defecto
-var level = nivelesObjs.Facil;
+var Banco = {
+    Facil: [
+        new Operacion ('2+2','4','3','5'),
+        new Operacion ('3+3','6','4','7'),
+        new Operacion ('5+5','10','15','9')
+    ],
+
+    Medio: [
+        new Operacion ('2+3','5','3','6'),
+        new Operacion ('3+5','8','4','7'),
+        new Operacion ('5+9','14','12','8')
+    ],
+
+    Dificil: [
+        new Operacion ('7+3','10','9','12'),
+        new Operacion ('8+5','13','10','9'),
+        new Operacion ('10-5','5','4','6')
+    ],
+};
 
 // VARIABLES 
 
@@ -72,8 +80,11 @@ var cen_der;
 var cen_izq;
 var izq_cen;
 
-//Animacion
-var anim = 'Quad'
+//Vidas
+var nVidas;
+var v1;
+var v2;
+var v3;
 
 // Timer
 var timer;
@@ -84,7 +95,12 @@ function seg(s){
     return (s) * 1000;
 };
 
-//Progreso
+//Progreso (Entero)
+//
+// 0 => Facil / Azul
+// 1 => Medio / Azul y amarillo
+// 2 => Dificil / Azul, amarillo y rojo
+// 3 => Todo
 
 var jProgreso;
 
@@ -123,6 +139,7 @@ class Boot extends Phaser.Scene{
         this.load.image('redCar', 'red_car.png');
         this.load.image('greenCar', 'green_car.png');
         this.load.image('lock', 'candado.png');
+        this.load.image('vida', 'gear.png');
 
         if (!localStorage.getItem('progreso')){
     
@@ -134,7 +151,8 @@ class Boot extends Phaser.Scene{
 
         // PARA VER TODO EL JUEGO REMOVER AL FINAL
         jProgreso = 3;
-        console.log(jProgreso);
+        console.log("jProgreso: " + jProgreso);
+        //***************************************************************************************************************** */
 
         var p = this.add.text(w/2, h/2, "Cargando... 0%", {fontSize: 30}).setOrigin(0.5, 0.5);
         this.load.on('progress', (value) => { p.setText(`Cargando... ${Math.floor(value*100)}%`) });
@@ -427,6 +445,13 @@ class Juego extends Phaser.Scene{
         //Camino de fondo que da vueltas
         road = this.add.tileSprite(400, 300, 0, 0, "road");
 
+        //Vidas
+        nVidas = 3;
+
+        v1 = this.add.image(50, 50, 'vida').setScale(0.17);
+        v2 = this.add.image(120, 50, 'vida').setScale(0.17);
+        v3 = this.add.image(190, 50, 'vida').setScale(0.17);
+
         //Definicion del carro
         car = this.physics.add.image(400, 475, carColor)
         .setScale(0.9);
@@ -436,6 +461,9 @@ class Juego extends Phaser.Scene{
 
         //Definicion del teclado
         cursors = this.input.keyboard.createCursorKeys();
+
+        //Animacion
+        var anim = 'Quad';
 
         //Tweens de direccion: orgigen_destino
         cen_der = this.tweens.add({
