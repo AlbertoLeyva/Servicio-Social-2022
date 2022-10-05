@@ -155,7 +155,7 @@ class Boot extends Phaser.Scene{
         jProgreso = localStorage.getItem('progreso');
         
         // PARA VER TODO EL JUEGO REMOVER AL FINAL ******************************************************************************
-        jProgreso = 2;
+        jProgreso = 3;
         console.log("jProgreso: " + jProgreso);
         //***************************************************************************************************************** */
 
@@ -163,7 +163,6 @@ class Boot extends Phaser.Scene{
         this.load.on('progress', (value) => { p.setText(`Cargando... ${Math.floor(value*100)}%`) });
         this.load.on('complete', () => { this.scene.start('menu'); });
     }
-
 }
 
 class Menu extends Phaser.Scene{
