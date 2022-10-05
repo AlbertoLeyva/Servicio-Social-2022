@@ -31,7 +31,7 @@ class Operacion{
     }
 }
 
-var Banco = {
+const Banco = {
     Facil: [
         new Operacion ('2+2','4','3','5'),
         new Operacion ('3+3','6','4','7'),
@@ -65,6 +65,10 @@ var car;
 
 // Colo del carro por default
 var carColor = 'blueCar';
+
+//Dificultad
+var lvl = 'Facil';
+var nivel;
 
 //Carretera de fondo
 var road;
@@ -141,6 +145,7 @@ class Boot extends Phaser.Scene{
         this.load.image('lock', 'candado.png');
         this.load.image('vida', 'gear.png');
 
+        
         if (!localStorage.getItem('progreso')){
     
             localStorage.setItem('progreso', 0);
@@ -148,9 +153,9 @@ class Boot extends Phaser.Scene{
         }
 
         jProgreso = localStorage.getItem('progreso');
-
-        // PARA VER TODO EL JUEGO REMOVER AL FINAL
-        jProgreso = 3;
+        
+        // PARA VER TODO EL JUEGO REMOVER AL FINAL ******************************************************************************
+        jProgreso = 2;
         console.log("jProgreso: " + jProgreso);
         //***************************************************************************************************************** */
 
@@ -319,7 +324,8 @@ class Seleccion extends Phaser.Scene{
         .setInteractive()
         .on('pointerover', () => btFacil.setScale(s + 0.2))
         .on('pointerout', () => btFacil.setScale(s))
-        .on('pointerdown', () => btFacil.clearTint() && btMedio.setTint(gris) && btDificil.setTint(gris));
+        .on('pointerdown', () => btFacil.clearTint() && btMedio.setTint(gris) && btDificil.setTint(gris))
+        .on('pointerdown', () => lvl = 'Facil');
 
         var btMedio = this.add.image(w/4, h/3 + 130, 'btMedio')
         .setTint(gris)
@@ -327,7 +333,8 @@ class Seleccion extends Phaser.Scene{
         .setInteractive()
         .on('pointerover', () => btMedio.setScale(s + 0.2))
         .on('pointerout', () => btMedio.setScale(s))
-        .on('pointerdown', () => btFacil.setTint(gris) && btMedio.clearTint() && btDificil.setTint(gris));
+        .on('pointerdown', () => btFacil.setTint(gris) && btMedio.clearTint() && btDificil.setTint(gris))
+        .on('pointerdown', () => lvl = 'Medio');
 
         var btDificil = this.add.image(w/4, h/3 + 230, 'btDificil')
         .setTint(gris)
@@ -335,7 +342,8 @@ class Seleccion extends Phaser.Scene{
         .setInteractive()
         .on('pointerover', () => btDificil.setScale(s + 0.2))
         .on('pointerout', () => btDificil.setScale(s))
-        .on('pointerdown', () => btFacil.setTint(gris) && btMedio.setTint(gris) && btDificil.clearTint());
+        .on('pointerdown', () => btFacil.setTint(gris) && btMedio.setTint(gris) && btDificil.clearTint())
+        .on('pointerdown', () => lvl = 'Dificil');
 
         //Carros
 
@@ -412,7 +420,7 @@ class Seleccion extends Phaser.Scene{
         .setInteractive()
         .on('pointerover', () => btJugar.setScale(s+0.2))
         .on('pointerout', () => btJugar.setScale(s))                
-        .once('pointerdown', () => { this.scene.start('juego'); });
+        .once('pointerdown', () => { this.scene.start('juego');});
 
         //Atras
 
@@ -441,6 +449,9 @@ class Juego extends Phaser.Scene{
     //Creacion de elementos
     create ()
     {
+
+        //Nivel
+        nivel = Banco[lvl];
 
         //Camino de fondo que da vueltas
         road = this.add.tileSprite(400, 300, 0, 0, "road");
