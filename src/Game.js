@@ -59,6 +59,7 @@ const h = 600;
 
 //Para el teclado
 var cursors;
+var keys;
 
 //Carro principal
 var car;
@@ -86,18 +87,53 @@ var izq_cen;
 
 //Vidas
 var nVidas;
+var v;
 var v1;
 var v2;
 var v3;
+
+//Variables del juego
 
 // Timer
 var timer;
 var tiempo;
 
+//Textos
+
+var pregunta;
+var opcion1;
+var opcion2;
+var opcion3;
+
+var opciones;
+
+var derrape;
+
+var eleccion = 'cen';
+
 //Funcion simple que convierte a segundos
 function seg(s){
     return (s) * 1000;
 };
+
+//Funcion que randomiza elementos en un array
+function shuffle(array) {
+    let currentIndex = array.length,  randomIndex;
+  
+    // While there remain elements to shuffle.
+    while (currentIndex != 0) {
+  
+      // Pick a remaining element.
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+  
+      // And swap it with the current element.
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex], array[currentIndex]];
+    }
+  
+    return array;
+  }
 
 //Progreso (Entero)
 //
@@ -107,6 +143,10 @@ function seg(s){
 // 3 => Todo
 
 var jProgreso;
+
+var parar;
+
+var count = 0;
 
 //Cargar recursos 
 
@@ -155,7 +195,7 @@ class Boot extends Phaser.Scene{
         jProgreso = localStorage.getItem('progreso');
         
         // PARA VER TODO EL JUEGO REMOVER AL FINAL ******************************************************************************
-        jProgreso = 3;
+        jProgreso = 0;
         console.log("jProgreso: " + jProgreso);
         //***************************************************************************************************************** */
 
@@ -458,12 +498,10 @@ class Juego extends Phaser.Scene{
         //Vidas
         nVidas = 3;
 
-        v1 = this.add.image(50, 50, 'vida').setScale(0.17);
-        v2 = this.add.image(120, 50, 'vida').setScale(0.17);
-        v3 = this.add.image(190, 50, 'vida').setScale(0.17);
+        v = [this.add.image(50, 50, 'vida').setScale(0.17), this.add.image(120, 50, 'vida').setScale(0.17), this.add.image(190, 50, 'vida').setScale(0.17)];
 
         //Definicion del carro
-        car = this.physics.add.image(400, 475, carColor)
+        car = this.physics.add.image(centro, 475, carColor)
         .setScale(0.9);
 
         //Que no se salga del canvas
@@ -471,6 +509,7 @@ class Juego extends Phaser.Scene{
 
         //Definicion del teclado
         cursors = this.input.keyboard.createCursorKeys();
+        keys = this.input.keyboard;
 
         //Animacion
         var anim = 'Quad';
@@ -516,11 +555,47 @@ class Juego extends Phaser.Scene{
             onComplete: () => car.setAngle(0)
         });
 
+        derrape = this.tweens.timeline({
+
+            targets: car,
+            paused: true,
+            duration: seg(0.5),
+
+            tweens: [
+                {
+                    y: 550,
+                    angle: 45,
+                },
+                {
+                    angle: -45
+                },
+                {
+                    y: 475,
+                    angle: 0
+                }
+            ]
+            
+        });
+
+        //Respuestas
+
+        pregunta = this.add.text(centro, 75).setOrigin(0.5);
+        opcion1 = this.add.text(izquierda, 220).setOrigin(0.5);
+        opcion2 = this.add.text(centro, 220).setOrigin(0.5);
+        opcion3 = this.add.text(derecha,220).setOrigin(0.5);
+
         //Timer
 
-        timer = this.time.addEvent({delay: seg(4), callback: this.girar})
+        //this.mostrarOpciones(i);
+
+        parar = this.time;
+
+        this.mostrarOpciones();
+
+        timer = this.time.addEvent({delay: seg(5), repeat: 2, callback: this.mostrarRespuesta});
 
         tiempo = this.add.text(w-120,20);
+
     }
 
     update ()
@@ -539,12 +614,14 @@ class Juego extends Phaser.Scene{
             if (car.x < centro + 10 && car.x > centro - 10)
             {
                 cen_der.play();
+                eleccion = 'der';
             }
 
             //Si esta en el cajon de la izquiera se va en medio
             else if (car.x < izquierda + 10 && car.x > izquierda - 10)
             {
                 izq_cen.play();
+                eleccion = 'cen'
             }
             
         }
@@ -556,26 +633,86 @@ class Juego extends Phaser.Scene{
             if (car.x < derecha + 10 && car.x > derecha - 10)
             {
                 der_cen.play();
+                eleccion = 'cen';
             }
 
             //Si está en el cajon de en medio se va a la izquierda
             else if (car.x < centro + 10 && car.x > centro - 10)
             {
                 cen_izq.play();
+                eleccion = 'izq';
             }
         }
 
         tiempo
-        .setText(timer.getRemainingSeconds().toString().substr(0,1))
+        .setText(Math.floor(timer.getRemainingSeconds())+[])
         .setFontFamily('Arial')
         .setFill('#FF0000')
         .setFontSize(60)
         .setStroke('#000', 5);
     }
 
-    girar()
+    mostrarOpciones()
     {
-        console.log("xd");
+        pregunta
+        .setText(nivel[count].op)
+        .setFontFamily('Arial')
+        .setFill('#FFF')
+        .setFontSize(60)
+        .setStroke('#000', 5)
+        .setBackgroundColor('#FDFF85');
+
+        opciones = [opcion1, opcion2, opcion3]
+
+        shuffle(opciones);
+
+        opciones[0].setText(nivel[count].res)
+        .setFontFamily('Arial')
+        .setFill('#FFF')
+        .setFontSize(60)
+        .setStroke('#000', 5)
+        .setBackgroundColor('#9BFCFF');
+
+        opciones[1].setText(nivel[count].t1)
+        .setFontFamily('Arial')
+        .setFill('#FFF')
+        .setFontSize(60)
+        .setStroke('#000', 5)
+        .setBackgroundColor('#9BFCFF');
+
+        opciones[2].setText(nivel[count].t2)
+        .setFontFamily('Arial')
+        .setFill('#FFF')
+        .setFontSize(60)
+        .setStroke('#000', 5)
+        .setBackgroundColor('#9BFCFF');
+
+    }
+
+    mostrarRespuesta(){
+
+        keys.enabled = false;   
+
+        opciones[0]
+        .setBackgroundColor('#00FF00');
+
+        opciones[1]
+        .setBackgroundColor('#FF0000');
+
+        opciones[2]
+        .setBackgroundColor('#FF0000');
+
+        if (car.x != opciones[0].x){
+            derrape.play();
+            nVidas = nVidas - 1;
+            v[nVidas].setTint('#FF0000'); 
+            v.pop();
+        };
+
+        parar.delayedCall(seg(1), () => keys.enabled = true , [], this);
+
+        count++;
+
     }
 }
 
