@@ -10,7 +10,7 @@
 
     Servicio Social 2022 | FMAT | UADY 
 
-    Ultima modificación: 2/10/22
+    Ultima modificación: 6/10/22
 
 ========================================================================================
 
@@ -35,7 +35,8 @@ const Banco = {
     Facil: [
         new Operacion ('2+2','4','3','5'),
         new Operacion ('3+3','6','4','7'),
-        new Operacion ('5+5','10','15','9')
+        new Operacion ('5+5','10','15','9'),
+        new Operacion ('1+1','2','1','3')
     ],
 
     Medio: [
@@ -74,6 +75,10 @@ var nivel;
 //Carretera de fondo
 var road;
 
+//Roca y aceite
+var roca;
+var aceite;
+
 //Puntos a donde se mueve el carro
 var centro = 400;
 var derecha = 650;
@@ -101,6 +106,10 @@ var tiempo;
 //Textos
 
 var pregunta;
+var preguntas;
+
+const nPreguntas = 3;
+
 var opcion1;
 var opcion2;
 var opcion3;
@@ -108,8 +117,8 @@ var opcion3;
 var opciones;
 
 var derrape;
-
-var eleccion = 'cen';
+var avanzar;
+var chocar;
 
 //Funcion simple que convierte a segundos
 function seg(s){
@@ -184,6 +193,8 @@ class Boot extends Phaser.Scene{
         this.load.image('greenCar', 'green_car.png');
         this.load.image('lock', 'candado.png');
         this.load.image('vida', 'gear.png');
+        this.load.image('oil', 'Oil.png');
+        this.load.image('rock', 'Rock.png')
 
         
         if (!localStorage.getItem('progreso')){
@@ -192,11 +203,14 @@ class Boot extends Phaser.Scene{
         
         }
 
-        jProgreso = localStorage.getItem('progreso');
+        jProgreso = parseInt(localStorage.getItem('progreso'));
         
         // PARA VER TODO EL JUEGO REMOVER AL FINAL ******************************************************************************
-        jProgreso = 0;
-        console.log("jProgreso: " + jProgreso);
+        //jProgreso = 0;
+        //console.log("jProgreso: " + jProgreso);
+        //
+        // Resetear el navegador con "localStorage.setItem('progreso',0);" en la consola o donde sea
+        //
         //***************************************************************************************************************** */
 
         var p = this.add.text(w/2, h/2, "Cargando... 0%", {fontSize: 30}).setOrigin(0.5, 0.5);
@@ -358,6 +372,8 @@ class Seleccion extends Phaser.Scene{
         var s = 0.5;
         var gris = 0x1A1A1A;
 
+        lvl = 'Facil';
+
         var btFacil = this.add.image(w/4, h/3 + 30, 'btFacil')
         .setScale(s)
         .setInteractive()
@@ -495,6 +511,10 @@ class Juego extends Phaser.Scene{
         //Camino de fondo que da vueltas
         road = this.add.tileSprite(400, 300, 0, 0, "road");
 
+        //Roca y Aceite
+        roca = this.add.image(izquierda, 0, 'rock').setOrigin(0.5,1).setScale(0.3);
+        aceite = this.add.image(centro, 0, 'oil').setOrigin(0.5,1).setScale(0.3);
+
         //Vidas
         nVidas = 3;
 
@@ -560,39 +580,102 @@ class Juego extends Phaser.Scene{
             targets: car,
             paused: true,
             duration: seg(0.5),
+            ease: anim,
+            loop: -1,
 
             tweens: [
                 {
-                    y: 550,
+                    y: 300,
                     angle: 45,
                 },
                 {
+                    y: 550,
                     angle: -45
                 },
                 {
                     y: 475,
                     angle: 0
                 }
-            ]
+            ],
+
+            onLoop: () => {
+
+                this.mostrarOpciones(); 
+                derrape.pause();
+                if (nVidas == 0){
+                    this.scene.start('perder');
+                };
+    
+                if (count == nPreguntas && nVidas > 0){
+                    this.scene.start('ganar');
+                };
+            }
             
+        });
+
+        avanzar = this.tweens.timeline({
+
+            targets: car,
+            paused: true,
+            duration: seg(0.5),
+            loop: -1,
+            ease: anim,
+
+            tweens: [
+                {
+                    y: 300,
+                },
+                {
+                    y: 475,
+                }
+            ],
+
+            onLoop: () => {
+
+                this.mostrarOpciones(); 
+                avanzar.pause();
+    
+                if (count == nPreguntas && nVidas > 0){
+                    this.scene.start('ganar');
+                };
+            }
+            
+        });
+
+        chocar = this.tweens.add({
+            targets: [roca, aceite],
+            paused: true,
+            y : h,
+            duration: seg(1),
+            ease: anim,
+            onComplete: () => { roca.y = 1; aceite.y = 1;}
         });
 
         //Respuestas
 
         pregunta = this.add.text(centro, 75).setOrigin(0.5);
+
+        preguntas = new Array(nivel.length);
+
+        for (var i = 0; i < nivel.length; i++){
+            preguntas[i] = nivel[i];
+        }
+
+        shuffle(preguntas);
+
         opcion1 = this.add.text(izquierda, 220).setOrigin(0.5);
         opcion2 = this.add.text(centro, 220).setOrigin(0.5);
         opcion3 = this.add.text(derecha,220).setOrigin(0.5);
 
         //Timer
 
-        //this.mostrarOpciones(i);
-
         parar = this.time;
 
+        keys.enabled = true
         this.mostrarOpciones();
+        //var show = this.time.addEvent({delay: seg(5), repeat: 2, callback: this.mostrarOpciones});
 
-        timer = this.time.addEvent({delay: seg(5), repeat: 2, callback: this.mostrarRespuesta});
+        timer = this.time.addEvent({delay: seg(10), repeat: 2, callback: this.mostrarRespuesta});
 
         tiempo = this.add.text(w-120,20);
 
@@ -614,14 +697,12 @@ class Juego extends Phaser.Scene{
             if (car.x < centro + 10 && car.x > centro - 10)
             {
                 cen_der.play();
-                eleccion = 'der';
             }
 
             //Si esta en el cajon de la izquiera se va en medio
             else if (car.x < izquierda + 10 && car.x > izquierda - 10)
             {
                 izq_cen.play();
-                eleccion = 'cen'
             }
             
         }
@@ -633,14 +714,12 @@ class Juego extends Phaser.Scene{
             if (car.x < derecha + 10 && car.x > derecha - 10)
             {
                 der_cen.play();
-                eleccion = 'cen';
             }
 
             //Si está en el cajon de en medio se va a la izquierda
             else if (car.x < centro + 10 && car.x > centro - 10)
             {
                 cen_izq.play();
-                eleccion = 'izq';
             }
         }
 
@@ -654,44 +733,51 @@ class Juego extends Phaser.Scene{
 
     mostrarOpciones()
     {
-        pregunta
-        .setText(nivel[count].op)
-        .setFontFamily('Arial')
-        .setFill('#FFF')
-        .setFontSize(60)
-        .setStroke('#000', 5)
-        .setBackgroundColor('#FDFF85');
+        if(count < nPreguntas){
 
-        opciones = [opcion1, opcion2, opcion3]
+            pregunta
+            .setText(preguntas[count].op)
+            .setFontFamily('Arial')
+            .setFill('#FFF')
+            .setFontSize(60)
+            .setStroke('#000', 5)
+            .setBackgroundColor('#FDFF85');
 
-        shuffle(opciones);
+            opciones = [opcion1, opcion2, opcion3]
 
-        opciones[0].setText(nivel[count].res)
-        .setFontFamily('Arial')
-        .setFill('#FFF')
-        .setFontSize(60)
-        .setStroke('#000', 5)
-        .setBackgroundColor('#9BFCFF');
+            shuffle(opciones);
 
-        opciones[1].setText(nivel[count].t1)
-        .setFontFamily('Arial')
-        .setFill('#FFF')
-        .setFontSize(60)
-        .setStroke('#000', 5)
-        .setBackgroundColor('#9BFCFF');
+            opciones[0].setText(preguntas[count].res)
+            .setFontFamily('Arial')
+            .setFill('#FFF')
+            .setFontSize(60)
+            .setStroke('#000', 5)
+            .setBackgroundColor('#9BFCFF');
 
-        opciones[2].setText(nivel[count].t2)
-        .setFontFamily('Arial')
-        .setFill('#FFF')
-        .setFontSize(60)
-        .setStroke('#000', 5)
-        .setBackgroundColor('#9BFCFF');
+            opciones[1].setText(preguntas[count].t1)
+            .setFontFamily('Arial')
+            .setFill('#FFF')
+            .setFontSize(60)
+            .setStroke('#000', 5)
+            .setBackgroundColor('#9BFCFF');
+
+            roca.x = opciones[1].x;
+            aceite.x = opciones[2].x;
+
+            opciones[2].setText(preguntas[count].t2)
+            .setFontFamily('Arial')
+            .setFill('#FFF')
+            .setFontSize(60)
+            .setStroke('#000', 5)
+            .setBackgroundColor('#9BFCFF');
+        } 
 
     }
 
     mostrarRespuesta(){
 
-        keys.enabled = false;   
+        keys.enabled = false;  
+        timer.paused = true; 
 
         opciones[0]
         .setBackgroundColor('#00FF00');
@@ -704,15 +790,133 @@ class Juego extends Phaser.Scene{
 
         if (car.x != opciones[0].x){
             derrape.play();
+            derrape.resume();
+            chocar.play();
             nVidas = nVidas - 1;
             v[nVidas].setTint('#FF0000'); 
             v.pop();
-        };
+        }
+        else{
+            avanzar.play();
+            avanzar.resume();
+            chocar.play();
+        }
 
-        parar.delayedCall(seg(1), () => keys.enabled = true , [], this);
+        parar.delayedCall(seg(1), () => {keys.enabled = true; timer.paused = false} , [], this);
 
         count++;
 
+    }
+}
+
+class Ganar extends Phaser.Scene{
+
+    constructor(){
+        super('ganar');
+    }
+
+    create(){
+
+        if(parseInt(localStorage.getItem('progreso')) < 3){
+            jProgreso = jProgreso + 1;
+            localStorage.setItem('progreso', jProgreso);
+        }
+
+        count = 0;
+
+        //Fondo
+        road = this.add.tileSprite(400, 300, 0, 0, "road");
+        road.alpha = 0.5;
+
+        // Mensajes
+        var msgG_G = this.add.text(w/2, h/2 - 70,
+        
+        "¡FELICIDADES!"
+        
+        ,{fontFamily: 'BoldnessRace', fontSize: 100, fill: '#FFF300', align: 'center'})
+        .setStroke('#FF0000', 3)
+        .setOrigin(0.5, 0.5)
+        .setPadding(10,10,10,10);
+
+        var msgP_G = this.add.text(w/2, h/2 + 70,
+        
+        "Has demostrado ser un gran corredor\n¡Sigue así!"
+        
+        ,{fontFamily: 'BoldnessRace', fontSize: 30, fill: '#FFF', align: 'center'})
+        .setStroke('#000', 3)
+        .setOrigin(0.5, 0.5)
+        .setPadding(10,10,10,10);
+
+        //Boton
+
+        var s = 0.5;
+
+        var btJugar = this.add.image(w/2, h/2 + 200 , 'btVamos')
+        .setScale(s)
+        .setInteractive()
+        .on('pointerover', () => btJugar.setScale(s+0.2))
+        .on('pointerout', () => btJugar.setScale(s))                 
+        .once('pointerdown', () => { this.scene.start('menu'); });
+
+    }
+
+    update(){
+        
+        // Movimiento del fondo
+        road.tilePositionY -= 3;
+    }
+
+}
+
+class Perder extends Phaser.Scene{
+
+    constructor(){
+        super('perder');
+    }
+
+    create(){
+
+        count = 0;
+
+        //Fondo
+        road = this.add.tileSprite(400, 300, 0, 0, "road");
+        road.alpha = 0.5;
+
+        // Mensajes
+        var msgG_P = this.add.text(w/2, h/2 - 70,
+        
+        "¡SUERTE LA\nPRÓXIMA! "
+        
+        ,{fontFamily: 'BoldnessRace', fontSize: 100, fill: '#FFF300', align: 'center'})
+        .setStroke('#FF0000', 3)
+        .setOrigin(0.5, 0.5)
+        .setPadding(10,10,10,10);
+
+        var msgP_P = this.add.text(w/2, h/2 + 70,
+        
+        "Fallaste esta vez, pero no importa\n¡Sigue intentando!"
+        
+        ,{fontFamily: 'BoldnessRace', fontSize: 30, fill: '#FFF', align: 'center'})
+        .setStroke('#000', 3)
+        .setOrigin(0.5, 0.5)
+        .setPadding(10,10,10,10);
+
+        //Boton
+
+        var s = 0.5;
+
+        var btJugar = this.add.image(w/2, h/2 + 200 , 'btVamos')
+        .setScale(s)
+        .setInteractive()
+        .on('pointerover', () => btJugar.setScale(s+0.2))
+        .on('pointerout', () => btJugar.setScale(s))                 
+        .once('pointerdown', () => { this.scene.start('menu'); });
+    }
+
+    update(){
+        
+        // Movimiento del fondo
+        road.tilePositionY -= 3;
     }
 }
 
@@ -729,7 +933,7 @@ const config = {
         }
     },
     
-    scene: [Boot, Menu, Juego, Seleccion, Instrucciones]
+    scene: [Boot, Menu, Juego, Seleccion, Instrucciones, Ganar, Perder]
 };
 
 document.fonts.load('10pt BoldnessRace').then(() => new Phaser.Game(config));
