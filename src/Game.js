@@ -254,7 +254,7 @@ class Boot extends Phaser.Scene{
 
         jProgreso = parseInt(localStorage.getItem('progreso'));
         
-        // PARA VER TODO EL JUEGO REMOVER AL FINAL ******************************************************************************
+        // PARA VER TODO EL JUEGO REMOVER AL FINAL *******************************************************************************
         //jProgreso = 0;
         //console.log("jProgreso: " + jProgreso);
         //
