@@ -10,7 +10,7 @@
 
     Servicio Social 2022 | FMAT | UADY 
 
-    Ultima modificación: 6/10/22
+    Ultima modificación: 7/10/22
 
 ========================================================================================
 
@@ -33,22 +33,58 @@ class Operacion{
 
 const Banco = {
     Facil: [
-        new Operacion ('2+2','4','3','5'),
-        new Operacion ('3+3','6','4','7'),
-        new Operacion ('5+5','10','15','9'),
-        new Operacion ('1+1','2','1','3')
+        new Operacion ('85+11','96','74','97'),
+        new Operacion ('36+79','115','116','105'),
+        new Operacion ('75-25','50','55','100'),
+        new Operacion ('7+8','15','14','16'),
+        new Operacion ('20-7','13','12','15'),
+        new Operacion ('90-36','54','45','64'),
+        new Operacion ('14+7','21','20','23'),
+        new Operacion ('52+24','76','86','96'),
+        new Operacion ('61+28','89','99','98'),
+        new Operacion ('15-7','8','9','7'),
+        new Operacion ('9+5','14','13','15'),
+        new Operacion ('90-30','60','50','70'),
+        new Operacion ('45-15','30','35','40'),
+        new Operacion ('60-24','36','40','44'),
+        new Operacion ('13-7','6','5','8')
     ],
 
     Medio: [
-        new Operacion ('2+3','5','3','6'),
-        new Operacion ('3+5','8','4','7'),
-        new Operacion ('5+9','14','12','8')
+        new Operacion ('450-75','375','225','325'),
+        new Operacion ('675+150','825','850','925'),
+        new Operacion ('375-175','200','300','275'),
+        new Operacion ('120+65','185','195','205'),
+        new Operacion ('150-85','65','70','95'),
+        new Operacion ('186+238','424','224','324'),
+        new Operacion ('335-185','150','250','450'),
+        new Operacion ('270+185','455','355','555'),
+        new Operacion ('425-140','285','385','265'),
+        new Operacion ('275+425','700','675','600'),
+        new Operacion ('750-55','695','595','625'),
+        new Operacion ('90+315','405','505','485'),
+        new Operacion ('115-60','55','70','65'),
+        new Operacion ('350+125','475','425','375'),
+        new Operacion ('567-203','364','274','304')
+
     ],
 
     Dificil: [
-        new Operacion ('7+3','10','9','12'),
-        new Operacion ('8+5','13','10','9'),
-        new Operacion ('10-5','5','4','6')
+        new Operacion ('1900+100','2000','2100','1890'),
+        new Operacion ('1970-880','1090','1080','1780'),
+        new Operacion ('4300+900','5200','5400','5190'),
+        new Operacion ('7639-700','6939','6900','5839'),
+        new Operacion ('2170+990','3160','2860','3100'),
+        new Operacion ('101+7305','7406','7316','8216'),
+        new Operacion ('8909-199','8710','7700','8080'),
+        new Operacion ('7305+1001','8306','7300','8206'),
+        new Operacion ('4020-766','3254','3200','2374'),
+        new Operacion ('2054-1115','939','800','839'),
+        new Operacion ('6817 +2700','9517','8500','9407'),
+        new Operacion ('5060-2089','2971','2700','3070'),
+        new Operacion ('4000+1700','5700','6070','6070'),
+        new Operacion ('409+2350','2759','2509','2709'),
+        new Operacion ('7142-7090','52','150','102')
     ],
 };
 
@@ -71,6 +107,8 @@ var carColor = 'blueCar';
 //Dificultad
 var lvl = 'Facil';
 var nivel;
+
+var tiempoNivel = 60*2;
 
 //Carretera de fondo
 var road;
@@ -108,7 +146,9 @@ var tiempo;
 var pregunta;
 var preguntas;
 
-const nPreguntas = 3;
+const nPreguntas = 5;
+var contPreg;
+var contPregT;
 
 var opcion1;
 var opcion2;
@@ -119,6 +159,8 @@ var opciones;
 var derrape;
 var avanzar;
 var chocar;
+
+var tAnim = 2;
 
 //Funcion simple que convierte a segundos
 function seg(s){
@@ -143,6 +185,9 @@ function shuffle(array) {
   
     return array;
   }
+
+  //Funcion de segundo a minutos xd
+  function fmtMSS(s){s = Math.floor(s); return(s-(s%=60))/60+(9<s?':':':0')+s}
 
 //Progreso (Entero)
 //
@@ -194,7 +239,11 @@ class Boot extends Phaser.Scene{
         this.load.image('lock', 'candado.png');
         this.load.image('vida', 'gear.png');
         this.load.image('oil', 'Oil.png');
-        this.load.image('rock', 'Rock.png')
+        this.load.image('rock', 'Rock.png');
+        this.load.image('difBox', 'diff_box.png');
+        this.load.image('carBox', 'car_box.png');
+        this.load.image('opBox', 'op_box1.png');
+        this.load.image('qBox', 'q_box2.png');
 
         
         if (!localStorage.getItem('progreso')){
@@ -252,7 +301,7 @@ class Menu extends Phaser.Scene{
         .setInteractive()
         .on('pointerover', () => btJugar.setScale(1.2))
         .on('pointerout', () => btJugar.setScale(1))                
-        .once('pointerdown', () => { this.scene.start('instrucciones'); });
+        .once('pointerdown', () => { this.scene.start('instrucciones1'); });
     }
 
     update ()
@@ -264,10 +313,10 @@ class Menu extends Phaser.Scene{
 
 }
 
-class Instrucciones extends Phaser.Scene{
+class Instrucciones1 extends Phaser.Scene{
 
     constructor(){
-        super('instrucciones');
+        super('instrucciones1');
     }
 
     create(){
@@ -289,7 +338,69 @@ class Instrucciones extends Phaser.Scene{
 
         var inst2 = this.add.text(w/2, h/2,
         
-        "Aparecerán en la pantalla operaciones\nmatemáticas que tendrás que hacer mentalmente.\n\nUsa las flechas del teclado para mover tu\ncarro a la respuesta que creas correcta.\n\n¡Escoge rápido porque tendrás poco tiempo!\n\nEl juego se acaba cuando hayas contestado todas\nlas operaciones o hayas tenido 3 errores."
+        "¿YA ARRANCARON SUS MOTORES?\n\nEn este juego tendrás que poner\na prueba tu mente y ser veloz estimando.\n\nEn la pantalla aparecerán operaciones\nmatemáticas que tendrás que hacer mentalmente."
+        
+        ,{fontFamily: 'BoldnessRace', fontSize: 30, fill: '#FFF', align: 'center'})
+        .setStroke('#000', 3)
+        .setOrigin(0.5, 0.5)
+        .setPadding(10,10,10,10);
+
+        //Boton
+
+        var s = 0.5;
+
+        var btJugar = this.add.image(w/2, h/2 + 240 , 'btSiguiente')
+        .setScale(s)
+        .setInteractive()
+        .on('pointerover', () => btJugar.setScale(s+0.2))
+        .on('pointerout', () => btJugar.setScale(s))                 
+        .once('pointerdown', () => { this.scene.start('instrucciones2'); });
+
+        //Atras
+
+        var btBack = this.add.image(55, 55 , 'btBack')
+        .setScale(s)
+        .setInteractive()
+        .on('pointerover', () => btBack.setScale(s+0.2))
+        .on('pointerout', () => btBack.setScale(s))                 
+        .once('pointerdown', () => { this.scene.start('menu'); });
+
+    }
+
+    update(){
+
+        // Movimiento del fondo
+        road.tilePositionY -= 3;
+    }
+
+}
+
+class Instrucciones2 extends Phaser.Scene{
+
+    constructor(){
+        super('instrucciones2');
+    }
+
+    create(){
+
+        //Camino de fondo que da vueltas
+        road = this.add.tileSprite(400, 300, 0, 0, "road");
+        road.alpha = 0.5;
+
+        //Instrucciones
+
+        var inst = this.add.text(w/2, h/2 - 230,
+        
+        "INSTRUCCIONES"
+        
+        ,{fontFamily: 'BoldnessRace', fontSize: 50, fill: '#FFF300', align: 'center'})
+        .setStroke('#FF0000', 3)
+        .setOrigin(0.5, 0.5)
+        .setPadding(10,10,10,10);
+
+        var inst2 = this.add.text(w/2, h/2,
+        
+        "Usa las flechas del teclado para mover tu\ncarro a la respuesta que creas correcta.\n\n¡Escoge rápido porque tendrás poco tiempo!\n\nEl juego se acaba cuando hayas contestado todas\nlas operaciones o hayas tenido 3 errores."
         
         ,{fontFamily: 'BoldnessRace', fontSize: 30, fill: '#FFF', align: 'center'})
         .setStroke('#000', 3)
@@ -314,7 +425,7 @@ class Instrucciones extends Phaser.Scene{
         .setInteractive()
         .on('pointerover', () => btBack.setScale(s+0.2))
         .on('pointerout', () => btBack.setScale(s))                 
-        .once('pointerdown', () => { this.scene.start('menu'); });
+        .once('pointerdown', () => { this.scene.start('instrucciones1'); });
 
     }
 
@@ -340,7 +451,7 @@ class Seleccion extends Phaser.Scene{
 
         //Seleccion
 
-        var inst = this.add.text(w/2, h/2 - 230,
+        var inst = this.add.text(w/2, h/2 - 260,
         
         "SELECCIÓN"
         
@@ -349,7 +460,7 @@ class Seleccion extends Phaser.Scene{
         .setOrigin(0.5, 0.5)
         .setPadding(10,10,10,10);
 
-        var inst2 = this.add.text(w/2, h/2 - 180,
+        var inst2 = this.add.text(w/2, h/2 - 210,
         
         "Selecciona la dificultad y tu carro."
         
@@ -358,7 +469,7 @@ class Seleccion extends Phaser.Scene{
         .setOrigin(0.5, 0.5)
         .setPadding(10,10,10,10);
 
-        var inst3 = this.add.text(w/2, h/2 - 150,
+        var inst3 = this.add.text(w/2, h/2 - 180,
         
         "¡Completa los niveles para conseguir los demás carros!"
         
@@ -369,40 +480,44 @@ class Seleccion extends Phaser.Scene{
 
         //Dificulltades
 
+        var boxD = this.add.image(w/4, h/3 + 120, 'difBox');
+
         var s = 0.5;
         var gris = 0x1A1A1A;
 
         lvl = 'Facil';
 
-        var btFacil = this.add.image(w/4, h/3 + 30, 'btFacil')
+        var btFacil = this.add.image(w/4, h/3 + 40, 'btFacil')
         .setScale(s)
         .setInteractive()
         .on('pointerover', () => btFacil.setScale(s + 0.2))
         .on('pointerout', () => btFacil.setScale(s))
         .on('pointerdown', () => btFacil.clearTint() && btMedio.setTint(gris) && btDificil.setTint(gris))
-        .on('pointerdown', () => lvl = 'Facil');
+        .on('pointerdown', () => {lvl = 'Facil'; tiempoNivel = 60*2;});
 
-        var btMedio = this.add.image(w/4, h/3 + 130, 'btMedio')
+        var btMedio = this.add.image(w/4, h/3 + 140, 'btMedio')
         .setTint(gris)
         .setScale(s)
         .setInteractive()
         .on('pointerover', () => btMedio.setScale(s + 0.2))
         .on('pointerout', () => btMedio.setScale(s))
         .on('pointerdown', () => btFacil.setTint(gris) && btMedio.clearTint() && btDificil.setTint(gris))
-        .on('pointerdown', () => lvl = 'Medio');
+        .on('pointerdown', () => {lvl = 'Medio'; tiempoNivel = 60*3;});
 
-        var btDificil = this.add.image(w/4, h/3 + 230, 'btDificil')
+        var btDificil = this.add.image(w/4, h/3 + 240, 'btDificil')
         .setTint(gris)
         .setScale(s)
         .setInteractive()
         .on('pointerover', () => btDificil.setScale(s + 0.2))
         .on('pointerout', () => btDificil.setScale(s))
         .on('pointerdown', () => btFacil.setTint(gris) && btMedio.setTint(gris) && btDificil.clearTint())
-        .on('pointerdown', () => lvl = 'Dificil');
+        .on('pointerdown', () => {lvl = 'Dificil'; tiempoNivel = 60*3;});
 
         //Carros
 
-        var btBlue = this.add.image(450, 270, 'btBlue')
+        var boxC = this.add.image(550, 325, 'carBox');
+
+        var btBlue = this.add.image(450, 300, 'btBlue')
         .setScale(s - 0.2)
         .setInteractive()
         .on('pointerover', () => btBlue.setScale(s-0.1))
@@ -410,7 +525,7 @@ class Seleccion extends Phaser.Scene{
         .on('pointerdown', () => btBlue.clearTint() && btYellow.setTint(gris) && btRed.setTint(gris) && btGreen.setTint(gris))
         .on('pointerdown', () => carColor = 'blueCar');
 
-        var btYellow = this.add.image(650, 270, 'btYellow')
+        var btYellow = this.add.image(650, 300, 'btYellow')
         .setScale(s - 0.2)
         .setTint(gris)
         .setInteractive()
@@ -419,7 +534,7 @@ class Seleccion extends Phaser.Scene{
         .on('pointerdown', () => btBlue.setTint(gris) && btYellow.clearTint() && btRed.setTint(gris) && btGreen.setTint(gris))
         .on('pointerdown', () => carColor = 'yellowCar');
 
-        var btRed = this.add.image(450, 380, 'btRed')
+        var btRed = this.add.image(450, 400, 'btRed')
         .setScale(s - 0.2)
         .setTint(gris)
         .setInteractive()
@@ -428,7 +543,7 @@ class Seleccion extends Phaser.Scene{
         .on('pointerdown', () => btBlue.setTint(gris) && btYellow.setTint(gris) && btRed.clearTint() && btGreen.setTint(gris))
         .on('pointerdown', () => carColor = 'redCar');     
 
-        var btGreen = this.add.image(650, 380, 'btGreen')
+        var btGreen = this.add.image(650, 400, 'btGreen')
         .setScale(s - 0.2)
         .setTint(gris)
         .setInteractive()
@@ -439,11 +554,11 @@ class Seleccion extends Phaser.Scene{
 
         if (jProgreso == 0){
 
-            this.add.image(w/4, h/3 + 130, 'lock').setScale(0.2);
-            this.add.image(w/4, h/3 + 230, 'lock').setScale(0.2);
-            this.add.image(650, 270, 'lock').setScale(0.2);
-            this.add.image(450, 380, 'lock').setScale(0.2);
-            this.add.image(650, 380, 'lock').setScale(0.2);
+            this.add.image(w/4, h/3 + 140, 'lock').setScale(0.2);
+            this.add.image(w/4, h/3 + 240, 'lock').setScale(0.2);
+            this.add.image(650, 300, 'lock').setScale(0.2);
+            this.add.image(450, 400, 'lock').setScale(0.2);
+            this.add.image(650, 400, 'lock').setScale(0.2);
 
             btMedio.disableInteractive();
             btDificil.disableInteractive();
@@ -484,7 +599,7 @@ class Seleccion extends Phaser.Scene{
         .setInteractive()
         .on('pointerover', () => btBack.setScale(s+0.2))
         .on('pointerout', () => btBack.setScale(s))                 
-        .once('pointerdown', () => { this.scene.start('instrucciones'); });
+        .once('pointerdown', () => { this.scene.start('instrucciones2'); });
 
     }
 
@@ -579,14 +694,14 @@ class Juego extends Phaser.Scene{
 
             targets: car,
             paused: true,
-            duration: seg(0.5),
+            duration: seg(tAnim * 0.35),
             ease: anim,
             loop: -1,
 
             tweens: [
                 {
                     y: 300,
-                    angle: 45,
+                    angle: 45
                 },
                 {
                     y: 550,
@@ -617,7 +732,7 @@ class Juego extends Phaser.Scene{
 
             targets: car,
             paused: true,
-            duration: seg(0.5),
+            duration: seg(tAnim * 0.5),
             loop: -1,
             ease: anim,
 
@@ -646,13 +761,14 @@ class Juego extends Phaser.Scene{
             targets: [roca, aceite],
             paused: true,
             y : h,
-            duration: seg(1),
+            duration: seg(tAnim),
             ease: anim,
             onComplete: () => { roca.y = 1; aceite.y = 1;}
         });
 
         //Respuestas
 
+        var pBox = this.add.image(centro, 75, 'qBox').setOrigin(0.5);
         pregunta = this.add.text(centro, 75).setOrigin(0.5);
 
         preguntas = new Array(nivel.length);
@@ -663,8 +779,13 @@ class Juego extends Phaser.Scene{
 
         shuffle(preguntas);
 
+        var op1Box = this.add.image(izquierda, 220, 'opBox').setOrigin(0.5);
         opcion1 = this.add.text(izquierda, 220).setOrigin(0.5);
+
+        var op2Box = this.add.image(centro, 220, 'opBox').setOrigin(0.5);
         opcion2 = this.add.text(centro, 220).setOrigin(0.5);
+
+        var op2Box = this.add.image(derecha, 220, 'opBox').setOrigin(0.5);
         opcion3 = this.add.text(derecha,220).setOrigin(0.5);
 
         //Timer
@@ -673,19 +794,22 @@ class Juego extends Phaser.Scene{
 
         keys.enabled = true
         this.mostrarOpciones();
-        //var show = this.time.addEvent({delay: seg(5), repeat: 2, callback: this.mostrarOpciones});
 
-        timer = this.time.addEvent({delay: seg(10), repeat: 2, callback: this.mostrarRespuesta});
+        //seg(número de segundos totales del nivel)
+        timer = this.time.addEvent({delay: seg(tiempoNivel), repeat: nPreguntas, callback: this.mostrarRespuesta});
 
-        tiempo = this.add.text(w-120,20);
+        tiempo = this.add.text(w-120,25);
 
+        contPreg = 1;
+
+        contPregT = this.add.text(w-120,85);
     }
 
     update ()
     {
         
         // Movimiento del fondo
-        road.tilePositionY -= 3;
+        road.tilePositionY -= 5;
 
         //TECLADO
 
@@ -724,11 +848,22 @@ class Juego extends Phaser.Scene{
         }
 
         tiempo
-        .setText(Math.floor(timer.getRemainingSeconds())+[])
+        .setText(fmtMSS(timer.getRemainingSeconds().toString()))
         .setFontFamily('Arial')
         .setFill('#FF0000')
-        .setFontSize(60)
-        .setStroke('#000', 5);
+        .setFontSize(50)
+        .setStroke('#000', 5).
+        setOrigin(0.5,0);
+
+        contPregT
+        .setText(contPreg + [] + "/5")
+        .setFontFamily('Arial')
+        .setFill('#000')
+        .setFontSize(50)
+        .setStroke('#FFF', 5).
+        setOrigin(0.5,0);
+
+        //.setText(Math.floor(timer.getRemainingSeconds())+[])
     }
 
     mostrarOpciones()
@@ -740,8 +875,7 @@ class Juego extends Phaser.Scene{
             .setFontFamily('Arial')
             .setFill('#FFF')
             .setFontSize(60)
-            .setStroke('#000', 5)
-            .setBackgroundColor('#FDFF85');
+            .setStroke('#000', 5);
 
             opciones = [opcion1, opcion2, opcion3]
 
@@ -751,15 +885,13 @@ class Juego extends Phaser.Scene{
             .setFontFamily('Arial')
             .setFill('#FFF')
             .setFontSize(60)
-            .setStroke('#000', 5)
-            .setBackgroundColor('#9BFCFF');
+            .setStroke('#000', 5);
 
             opciones[1].setText(preguntas[count].t1)
             .setFontFamily('Arial')
             .setFill('#FFF')
             .setFontSize(60)
-            .setStroke('#000', 5)
-            .setBackgroundColor('#9BFCFF');
+            .setStroke('#000', 5);
 
             roca.x = opciones[1].x;
             aceite.x = opciones[2].x;
@@ -768,8 +900,7 @@ class Juego extends Phaser.Scene{
             .setFontFamily('Arial')
             .setFill('#FFF')
             .setFontSize(60)
-            .setStroke('#000', 5)
-            .setBackgroundColor('#9BFCFF');
+            .setStroke('#000', 5);
         } 
 
     }
@@ -777,16 +908,18 @@ class Juego extends Phaser.Scene{
     mostrarRespuesta(){
 
         keys.enabled = false;  
-        timer.paused = true; 
+        timer.paused = true;
+        tiempo.visible = false;
+        contPregT.visible = false; 
 
         opciones[0]
-        .setBackgroundColor('#00FF00');
+        .setFill('#00FF00');
 
         opciones[1]
-        .setBackgroundColor('#FF0000');
+        .setFill('#FF0000');
 
         opciones[2]
-        .setBackgroundColor('#FF0000');
+        .setFill('#FF0000');
 
         if (car.x != opciones[0].x){
             derrape.play();
@@ -802,7 +935,21 @@ class Juego extends Phaser.Scene{
             chocar.play();
         }
 
-        parar.delayedCall(seg(1), () => {keys.enabled = true; timer.paused = false} , [], this);
+        parar.delayedCall(seg(tAnim), () => {
+            keys.enabled = true; 
+            timer.paused = false;
+            tiempo.visible = true;
+            contPregT.visible = true;
+            contPreg = contPreg + 1;
+            //opciones[0]
+            //.setBackgroundColor();
+
+            //opciones[1]
+            //.setBackgroundColor();
+
+            //opciones[2]
+            //.setBackgroundColor();
+        } , [], this);
 
         count++;
 
@@ -933,7 +1080,7 @@ const config = {
         }
     },
     
-    scene: [Boot, Menu, Juego, Seleccion, Instrucciones, Ganar, Perder]
+    scene: [Boot, Menu, Juego, Seleccion, Instrucciones1, Instrucciones2, Ganar, Perder]
 };
 
 document.fonts.load('10pt BoldnessRace').then(() => new Phaser.Game(config));
