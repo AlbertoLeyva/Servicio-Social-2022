@@ -1079,6 +1079,7 @@ const config = {
             gravity: {x: 0, y:0}
         }
     },
+    audio: {disableWebAudio: true},
     
     scene: [Boot, Menu, Juego, Seleccion, Instrucciones1, Instrucciones2, Ganar, Perder]
 };
