@@ -845,7 +845,7 @@ class Juego extends Phaser.Scene{
         //Timer
         parar = this.time;
         //seg(número de segundos totales del nivel)
-        timer = this.time.addEvent({delay: seg(3), repeat: nPreguntas, callback: this.mostrarRespuesta});
+        timer = this.time.addEvent({delay: seg(tiempoNivel), repeat: nPreguntas, callback: this.mostrarRespuesta});
 
         tiempo = this.add.text(w-120,25);
 
