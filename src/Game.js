@@ -205,6 +205,8 @@ var count = 0;
 var car_sound;
 var skid_sound;
 
+var menu_music = 0;
+
 //CLASE BOOT PARA CARGAR RECURSOS*******************************************************************
 
 class Boot extends Phaser.Scene{
@@ -301,8 +303,10 @@ class Menu extends Phaser.Scene{
         //Para que siga sonando la música
         this.sound.pauseOnBlur = false;
 
-        this.sound.stopAll();
-        var menu_music = this.sound.add('menu_music', {loop: true}).play();
+        //Inicio de la música
+        if(!menu_music){
+            menu_music = this.sound.add('menu_music', {loop: true}).play();
+        }
 
         //Camino de fondo que da vueltas
         road = this.add.tileSprite(w/2, h/2, 0, 0, "road");
@@ -841,7 +845,7 @@ class Juego extends Phaser.Scene{
         //Timer
         parar = this.time;
         //seg(número de segundos totales del nivel)
-        timer = this.time.addEvent({delay: seg(tiempoNivel), repeat: nPreguntas, callback: this.mostrarRespuesta});
+        timer = this.time.addEvent({delay: seg(3), repeat: nPreguntas, callback: this.mostrarRespuesta});
 
         tiempo = this.add.text(w-120,25);
 
@@ -1054,7 +1058,7 @@ class Ganar extends Phaser.Scene{
         .setInteractive()
         .on('pointerover', () => btJugar.setScale(s+0.2))
         .on('pointerout', () => btJugar.setScale(s))                 
-        .once('pointerdown', () => { this.scene.start('menu'); });
+        .once('pointerdown', () => { this.sound.stopAll(); menu_music = 0; this.scene.start('menu'); });
 
     }
 
@@ -1114,7 +1118,7 @@ class Perder extends Phaser.Scene{
         .setInteractive()
         .on('pointerover', () => btJugar.setScale(s+0.2))
         .on('pointerout', () => btJugar.setScale(s))                 
-        .once('pointerdown', () => { this.scene.start('menu'); });
+        .once('pointerdown', () => { this.sound.stopAll(); menu_music = 0; this.scene.start('menu'); });
     }
 
     update(){
