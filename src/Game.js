@@ -10,7 +10,7 @@
 
     Servicio Social 2022 | FMAT | UADY 
 
-    Ultima modificación: 10/10/22
+    Ultima modificación: 11/10/22
 
 ========================================================================================
 
@@ -437,7 +437,7 @@ class Instrucciones2 extends Phaser.Scene{
 
         var inst2 = this.add.text(w/2, h/2,
         
-        "Usa las flechas del teclado para mover tu\ncarro a la respuesta que creas correcta.\n\n¡Escoge rápido porque tendrás poco tiempo!\n\nEl juego se acaba cuando hayas contestado todas\nlas operaciones o hayas tenido 3 errores."
+        "Usa las FLECHAS DEL TECLADO para mover tu\ncarro a la respuesta que creas correcta.\n\n¡Escoge rápido porque tendrás poco tiempo!\n\nSi crees que ya tienes la respuesta\nusa ESPACIO para adelantar el reloj.\n\nEl juego se acaba cuando hayas contestado todas\nlas operaciones o hayas tenido 3 errores."
         
         ,{fontFamily: 'BoldnessRace', fontSize: 30, fill: '#FFF', align: 'center'})
         .setStroke('#000', 3)
@@ -530,7 +530,7 @@ class Seleccion extends Phaser.Scene{
         .on('pointerover', () => btFacil.setScale(s + 0.2))
         .on('pointerout', () => btFacil.setScale(s))
         .on('pointerdown', () => btFacil.clearTint() && btMedio.setTint(gris) && btDificil.setTint(gris))
-        .on('pointerdown', () => {lvl = 'Facil'; tiempoNivel = 60*2;});
+        .on('pointerdown', () => {lvl = 'Facil'; tiempoNivel = 45;});
 
         var btMedio = this.add.image(w/4, h/3 + 140, 'btMedio')
         .setTint(gris)
@@ -539,7 +539,7 @@ class Seleccion extends Phaser.Scene{
         .on('pointerover', () => btMedio.setScale(s + 0.2))
         .on('pointerout', () => btMedio.setScale(s))
         .on('pointerdown', () => btFacil.setTint(gris) && btMedio.clearTint() && btDificil.setTint(gris))
-        .on('pointerdown', () => {lvl = 'Medio'; tiempoNivel = 60*3;});
+        .on('pointerdown', () => {lvl = 'Medio'; tiempoNivel = 55;});
 
         var btDificil = this.add.image(w/4, h/3 + 240, 'btDificil')
         .setTint(gris)
@@ -548,7 +548,7 @@ class Seleccion extends Phaser.Scene{
         .on('pointerover', () => btDificil.setScale(s + 0.2))
         .on('pointerout', () => btDificil.setScale(s))
         .on('pointerdown', () => btFacil.setTint(gris) && btMedio.setTint(gris) && btDificil.clearTint())
-        .on('pointerdown', () => {lvl = 'Dificil'; tiempoNivel = 60*3;});
+        .on('pointerdown', () => {lvl = 'Dificil'; tiempoNivel = 90;});
 
         //Carros
 
@@ -657,11 +657,13 @@ class Juego extends Phaser.Scene{
 
     //Creacion de elementos
     create ()
-    {
+    {   
 
+        //Empieza la música
         this.sound.stopAll();
         var ingame_music = this.sound.add('ingame_music', {loop: true}).play();
 
+        //Define sonidos
         car_sound = this.sound.add('car_sound');
         skid_sound = this.sound.add('skid_sound');
 
@@ -689,10 +691,23 @@ class Juego extends Phaser.Scene{
 
         //Definicion del teclado
         cursors = this.input.keyboard.createCursorKeys();
+        var espacio = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         keys = this.input.keyboard;
 
         //Animacion
         var anim = 'Quad';
+
+        //Timer
+        parar = this.time;
+
+        //seg(número de segundos totales del nivel)
+
+        timer = new Phaser.Time.TimerEvent({delay: seg(tiempoNivel), callback: this.mostrarRespuesta});
+        //timer = this.time.addEvent({delay: seg(tiempoNivel), callback: this.mostrarRespuesta});
+
+        this.time.addEvent(timer);
+
+        tiempo = this.add.text(w-120,25);
 
         //Tweens de direccion: origen_destino
         cen_der = this.tweens.add({
@@ -761,6 +776,8 @@ class Juego extends Phaser.Scene{
 
             onLoop: () => {
 
+                timer.reset({delay: seg(tiempoNivel), callback: this.mostrarRespuesta});
+                this.time.addEvent(timer);
                 this.mostrarOpciones(); 
                 derrape.pause();
                 if (nVidas == 0){
@@ -793,6 +810,8 @@ class Juego extends Phaser.Scene{
 
             onLoop: () => {
 
+                timer.reset({delay: seg(tiempoNivel), callback: this.mostrarRespuesta});
+                this.time.addEvent(timer);
                 this.mostrarOpciones(); 
                 avanzar.pause();
     
@@ -842,13 +861,6 @@ class Juego extends Phaser.Scene{
         //Keys Aux
         keys.enabled = true
 
-        //Timer
-        parar = this.time;
-        //seg(número de segundos totales del nivel)
-        timer = this.time.addEvent({delay: seg(tiempoNivel), repeat: nPreguntas, callback: this.mostrarRespuesta});
-
-        tiempo = this.add.text(w-120,25);
-
         //Conteo
         contPreg = 1;
 
@@ -857,6 +869,13 @@ class Juego extends Phaser.Scene{
         //Inicia la primera pregunta
 
         this.mostrarOpciones();
+
+        espacio.on('down', () => {
+
+            timer.remove(true);
+    
+        }, this);
+
     }
 
     update ()
@@ -997,6 +1016,7 @@ class Juego extends Phaser.Scene{
             tiempo.visible = true;
             contPregT.visible = true;
             contPreg = contPreg + 1;
+            
         } , [], this);
 
         count++;
