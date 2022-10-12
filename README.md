@@ -6,3 +6,7 @@ El juego se centra en el tema de estimaciones y de cálculo mental.
 Este juego esta hecho con el framework Phaser, por lo que es necesario correrlo bajo un servidor (puede ser el de tu preferencia):
 
 `python -m http.server`
+
+Hosteado en:
+
+[https://carrera-estimaciones.glitch.me](https://carrera-estimaciones.glitch.me)
